@@ -1,7 +1,7 @@
 {
-    "id": "XdJAjAN5Jbi",
+    "id": "eETAjA1K2Ra",
     "manifest_version": 1,
-    "name": "Salesforce Record",
+    "name": "Salesforce Records",
     "version_name": "1.0",
     "version_number": 1,
     "min_api_version": "0.1.026",
@@ -12,14 +12,42 @@
     "js_files": ["dist/app.js"],
     "css_files": ["dist/app.css"],
     "csp_sources": {
-        "img_srcs": [
-            "http://localhost:8080"
+        "script_srcs": [
+            "*.force.com",
+            "'unsafe-eval'",
+            "'unsafe-inline'",
+            "https://gridbuddydemo--gblite.na35.visual.force.com",
+            "https://gridbuddydemo.my.salesforce.com/"
+        ],
+        "font_srcs": [
+            "https://gridbuddydemo.force.com",
+            "https://gridbuddydemo.my.salesforce.com/",
+            "https://gridbuddydemo--gblite.na35.visual.force.com"
         ],
         "frame_srcs": [
-            "http://localhost:8080"
+            "https://gridbuddydemo.force.com",
+            "https://gridbuddydemo.my.salesforce.com/",
+            "https://gridbuddydemo--gblite.na35.visual.force.com"
+        ],
+        "img_srcs": [
+            "https://gridbuddydemo.force.com",
+            "https://gridbuddydemo.my.salesforce.com/",
+            "https://gridbuddydemo--gblite.na35.visual.force.com"
         ],
         "connect_srcs": [
-            "http://localhost:8080"
+            "https://gridbuddydemo.force.com",
+            "https://gridbuddydemo.my.salesforce.com/",
+            "https://gridbuddydemo--gblite.na35.visual.force.com"
+        ],
+        "media_srcs": [
+            "https://gridbuddydemo.force.com",
+            "https://gridbuddydemo.my.salesforce.com/",
+            "https://gridbuddydemo--gblite.na35.visual.force.com"
+        ],
+        "style_srcs": [
+            "https://gridbuddydemo.force.com",
+            "https://gridbuddydemo.my.salesforce.com/",
+            "https://gridbuddydemo--gblite.na35.visual.force.com"
         ]
     },
     "intercept_url_patterns": [

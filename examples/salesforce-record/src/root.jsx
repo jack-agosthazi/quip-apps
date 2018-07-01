@@ -60,7 +60,10 @@ quip.apps.initialize({
             rootRecord.useSandbox()
                 ? AUTH_CONFIG_NAMES.SANDBOX
                 : AUTH_CONFIG_NAMES.PRODUCTION);
+        console.log('root auth: ', auth)
+        //console.log('root auth.login: ', auth.login)
         const salesforceClient = new SalesforceClient(auth);
+        console.log('salesforceClient: ', salesforceClient)
         rootRecord.setClient(salesforceClient);
 
         if (params.isCreation && params.creationUrl) {
@@ -81,13 +84,16 @@ quip.apps.initialize({
         }
 
         ReactDOM.render(
+          <div>
             <RecordPicker
                 entity={rootRecord}
                 menuDelegate={menuDelegate}
                 ref={node => {
                     rootComponent = node;
                     rootRecord.setDom(ReactDOM.findDOMNode(node));
-                }}/>,
+                }}/>
+              <iframe src="https://gridbuddydemo--gblite.na35.visual.force.com/apex/gblite__Grid?gname=GridBuddy%20Pipeline%20View&amp;sh=0&amp;ssb=0" frameborder="0" width="100%" height="750" scrolling="auto"></iframe>
+          </div>,
             root);
         menuDelegate.refreshToolbar();
     },
