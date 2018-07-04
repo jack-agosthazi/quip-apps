@@ -38,6 +38,9 @@ quip.apps.registerClass(ReferenceFieldEntity, ReferenceFieldEntity.ID);
 quip.apps.registerClass(SalesforceRecordEntity, SalesforceRecordEntity.ID);
 quip.apps.registerClass(TextFieldEntity, TextFieldEntity.ID);
 
+
+console.log('grid-record: ', quip.apps.getRecordById('recordPicker'))
+
 let rootComponent;
 export function getRecordComponent() {
     const recordPicker = rootComponent.getWrappedComponent();
@@ -55,44 +58,39 @@ quip.apps.initialize({
     menuCommands: menuDelegate.allMenuCommands(),
     toolbarCommandIds: menuDelegate.getDefaultToolbarCommandIds(),
     initializationCallback: function(root, params) {
+console.log('*** root: ', root)
+
         const rootRecord = quip.apps.getRootRecord();
+console.log('*** rootRecord before: ', rootRecord)
         const auth = quip.apps.auth(
             rootRecord.useSandbox()
                 ? AUTH_CONFIG_NAMES.SANDBOX
                 : AUTH_CONFIG_NAMES.PRODUCTION);
-        console.log('root auth: ', auth)
-        //console.log('root auth.login: ', auth.login)
         const salesforceClient = new SalesforceClient(auth);
-        console.log('salesforceClient: ', salesforceClient)
         rootRecord.setClient(salesforceClient);
-
-        if (params.isCreation && params.creationUrl) {
-            const recordId = params.creationUrl
-                .split("sObject/")[1]
-                .split("/view")[0];
-            if (recordId.length == 18) {
-                rootRecord.fetchData().then(() => {
-                    rootRecord.setSelectedRecord(recordId);
-                });
-            }
-        } else if (params.isCreation) {
-            rootRecord.loadPlaceholderData(PlaceholderData);
-        } else if (quip.apps.CreationSource &&
-            params.creationSource === quip.apps.CreationSource.TEMPLATE) {
-            rootRecord.clearData();
-            rootRecord.loadPlaceholderData(PlaceholderData);
+        //rootRecord.setGrid({
+        //    name: "GridBuddy Pipeline View"
+        //});
+        //const grid = rootRecord.getGrid();
+        const grid = {
+          name: "GridBuddy Pipeline View"
         }
+
+console.log('*** rootRecord getGrid before: ', rootRecord.getGrid());
+        rootRecord.setGrid({name:"GridBuddy Pipeline View"});
+console.log('*** rootRecord getGrid after: ', rootRecord.getGrid());
+console.log('*** rootRecord after: ', rootRecord)
 
         ReactDOM.render(
           <div>
-            <RecordPicker
+              {/*<RecordPicker
                 entity={rootRecord}
                 menuDelegate={menuDelegate}
                 ref={node => {
                     rootComponent = node;
                     rootRecord.setDom(ReactDOM.findDOMNode(node));
-                }}/>
-              <iframe src="https://gridbuddydemo--gblite.na35.visual.force.com/apex/gblite__Grid?gname=GridBuddy%20Pipeline%20View&amp;sh=0&amp;ssb=0" frameborder="0" width="100%" height="750" scrolling="auto"></iframe>
+                }}/>*/}
+              <iframe src={`https://gridbuddydemo--gblite.na35.visual.force.com/apex/gblite__Grid?gname=${encodeURIComponent(grid.name)}&sh=0&ssb=0`} style={{border: '1px solid #0000001f'}} width="100%" height="750" scrolling="auto"></iframe>
           </div>,
             root);
         menuDelegate.refreshToolbar();

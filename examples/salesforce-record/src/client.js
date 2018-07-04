@@ -30,15 +30,12 @@ const TIMEOUT = 15000;
 
 export class SalesforceClient {
     constructor(auth) {
-        console.log('auth: ', auth)
-        console.log('auth.login: ', auth.login)
         if (auth) {
             this.auth_ = auth;
-            this.instanceUrl_ = 'https://gridbuddydemo.my.salesforce.com';
-            if (auth.getTokenResponseParam("instance_url")) {
-                this.instanceUrl_ = auth
-                    .getTokenResponseParam("instance_url")
-                    .toLowerCase();
+            this.instanceUrl_ = undefined;
+            const instance_url = auth.getTokenResponseParam("instance_url");
+            if (instance_url) {
+                this.instanceUrl_ = instance_url.toLowerCase();
             }
         } else {
             this.instanceUrl_ = "http://localhost:8080";

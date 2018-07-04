@@ -25,6 +25,7 @@ export class RecordPickerEntity extends quip.apps.RootRecord {
             selectedRecord: SalesforceRecordEntity,
             useSandbox: "boolean",
             instanceUrl: "string",
+            grid: "object",
         };
     }
 
@@ -50,6 +51,18 @@ export class RecordPickerEntity extends quip.apps.RootRecord {
     setClient(client) {
         this.salesforceClient_ = client;
         this.setInstanceUrl(client.getInstanceUrl());
+    }
+    
+    setGrid(newGrid){
+        const oldGrid = this.get("grid");
+        this.set("grid", {
+            ...oldGrid,
+            ...newGrid,
+        });
+    }
+    
+    getGrid(){
+        return this.get("grid");
     }
 
     getClient() {
@@ -406,6 +419,14 @@ export class RecordPickerEntity extends quip.apps.RootRecord {
         return this.get("selectedRecord");
     }
 
+    setGridName(gridName){
+        this.set("gridName", gridName);
+    }
+    
+    getGridName(){
+        return this.get("gridName");
+    }
+    
     setSelectedRecord(recordId) {
         this.clearSelectedRecord();
         // Update the schema and owner based on the current user's view.
