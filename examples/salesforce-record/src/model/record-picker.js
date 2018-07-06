@@ -205,7 +205,7 @@ export class RecordPickerEntity extends quip.apps.RootRecord {
 
         const searchField = getSearchField(recordType);
         listViewsData["RecentlyViewed"] = {
-            label: quiptext("Recently Viewed"),
+            label: quiptext("Grids"),
             key: "RecentlyViewed",
             describeUrl: null,
             query:
@@ -241,7 +241,10 @@ export class RecordPickerEntity extends quip.apps.RootRecord {
             query = this.reformatQuery_(query, recordType, searchTerm);
         }
         // FIXME
+        console.log('*** QUERY ADDED HERE')
+        query = `SELECT GBLite__Grid_Name__c, Id, CreatedBy.Name, LastModifiedBy.Name FROM GBLite__GridBuddySettings__c WHERE GBLite__Default_Definition__c = true ORDER BY GBLite__Grid_Name__c ASC`;
         query = query + " LIMIT 200";
+        console.log('*** query: ', query)
         return this.getClient()
             .fetchSoqlQuery(query)
             .then(response => parseSoqlRecords(response, getSearchField));
@@ -268,6 +271,8 @@ export class RecordPickerEntity extends quip.apps.RootRecord {
         } else {
             query += ` Where ${searchField} LIKE \'%${searchTerm}%\' `;
         }
+        console.log('*** query: ', query)
+          //`SELECT GBLite__Grid_Name__c, Id, CreatedBy.Name, LastModifiedBy.Name FROM GBLite__GridBuddySettings__c WHERE GBLite__Default_Definition__c = true ORDER BY GBLite__Grid_Name__c ASC`
         return query;
     }
 
@@ -316,6 +321,7 @@ export class RecordPickerEntity extends quip.apps.RootRecord {
                     listViewKey
                 ].query = query;
                 return query;
+console.log('*** query: ', query)
             });
     }
 

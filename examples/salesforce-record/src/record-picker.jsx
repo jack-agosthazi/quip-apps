@@ -218,20 +218,20 @@ export default class RecordPicker extends React.Component {
         return <Dialog onDismiss={onDismiss}>
             <div className={Styles.dialog}>
                 <div className={Styles.header}>
-                    {quiptext("Select Salesforce Record")}
+                    {quiptext("Select Grid")}
                 </div>
                 <div className={Styles.picker}>
-                    <RecordTypePicker
+                    {/*<RecordTypePicker
                         selectedType={selectedRecordType}
                         types={recordTypes}
-                        onClick={this.selectRecordType_}/>
+                        onClick={this.selectRecordType_}/>*/}
                     <div className={Styles.columnGroup}>
-                        <ListViewPicker
+                        {/*<ListViewPicker
                             listViews={listViews}
                             listViewsLoadingStatus={listViewsLoadingStatus}
                             listViewsLoadingError={listViewsLoadingError}
                             selectedListViewKey={selectedListViewKey}
-                            onClick={this.selectListView_}/>
+                            onClick={this.selectListView_}/>*/}
                         {listViewsLoadingStatus ===
                             LOADING_STATUS.LOADED && <RecordFilter
                             query={query}

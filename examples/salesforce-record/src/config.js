@@ -79,6 +79,17 @@ const SUPPORTED_OBJECT_TYPES = {
         HEADER_FIELDS: ["FirstName", "LastName"],
         SEARCH_FIELD: "Name",
     },
+    
+    "GBLite__GridBuddySettings__c": {
+        PREFIX: "a0A",
+        DISPLAY_NAME: quiptext("Grids"),
+        DEFAULT_FIELDS: [
+            "GBLite__Grid_Name__c",
+            "GBLite__Default_Definition__c",
+        ],
+        HEADER_FIELDS: ["GBLite__Grid_Name__c"],
+        SEARCH_FIELD: "GBLite__Grid_Name__c",
+    },
 };
 
 /**
