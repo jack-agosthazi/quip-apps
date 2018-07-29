@@ -61,10 +61,7 @@ quip.apps.initialize({
     menuCommands: menuDelegate.allMenuCommands(),
     toolbarCommandIds: menuDelegate.getDefaultToolbarCommandIds(),
     initializationCallback: function(root, params) {
-console.log('*** root: ', root)
-
         const rootRecord = quip.apps.getRootRecord();
-console.log('*** rootRecord before: ', rootRecord)
         const auth = quip.apps.auth(
             rootRecord.useSandbox()
                 ? AUTH_CONFIG_NAMES.SANDBOX
@@ -74,48 +71,38 @@ console.log('*** rootRecord before: ', rootRecord)
 
 
 
-        if (params.isCreation && params.creationUrl) {
-            const recordId = params.creationUrl
-              .split("sObject/")[1]
-              .split("/view")[0];
-            if (recordId.length == 18) {
-                rootRecord.fetchData().then(() => {
-                    rootRecord.setSelectedRecord(recordId);
-                });
-            }
-        } else if (params.isCreation) {
-            rootRecord.loadPlaceholderData(PlaceholderData);
-        } else if (quip.apps.CreationSource &&
-          params.creationSource === quip.apps.CreationSource.TEMPLATE) {
-            rootRecord.clearData();
-            rootRecord.loadPlaceholderData(PlaceholderData);
-        }
+
+        //if (params.isCreation && params.creationUrl) {
+        //    const recordId = params.creationUrl
+        //      .split("sObject/")[1]
+        //      .split("/view")[0];
+        //    if (recordId.length == 18) {
+        //        rootRecord.fetchData().then(() => {
+        //            rootRecord.setSelectedRecord(recordId);
+        //        });
+        //    }
+        //} else if (params.isCreation) {
+        //    rootRecord.loadPlaceholderData(PlaceholderData);
+        //} else if (quip.apps.CreationSource &&
+        //  params.creationSource === quip.apps.CreationSource.TEMPLATE) {
+        //    rootRecord.clearData();
+        //    rootRecord.loadPlaceholderData(PlaceholderData);
+        //}
+
+        //rootRecord.loadPlaceholderData(PlaceholderData);
 
 
-
-            //rootRecord.setGrid({
-        //    name: "GridBuddy Pipeline View"
-        //});
-        //const grid = rootRecord.getGrid();
-        const grid = {
-          name: "GridBuddy Pipeline View"
-        }
-
-console.log('*** rootRecord getGrid before: ', rootRecord.getGrid());
-        rootRecord.setGrid({name:"GridBuddy Pipeline View"});
-console.log('*** rootRecord getGrid after: ', rootRecord.getGrid());
-console.log('*** rootRecord after: ', rootRecord)
 
         ReactDOM.render(
           <div>
               <WrappedRoot
                entity={rootRecord}
+               salesforceClient={salesforceClient}
                menuDelegate={menuDelegate}
                ref={node => {
                rootComponent = node;
                rootRecord.setDom(ReactDOM.findDOMNode(node));
                }}/>
-              <iframe src={`https://gridbuddydemo--gblite.na35.visual.force.com/apex/gblite__Grid?gname=${encodeURIComponent(grid.name)}&sh=0&ssb=0`} style={{border: '1px solid #0000001f'}} width="100%" height="750" scrolling="auto"></iframe>
           </div>,
           root);
         menuDelegate.refreshToolbar();
@@ -135,6 +122,15 @@ class Root extends React.Component {
             showMismatchedInstanceError: false,
             prevMenuCommand: null,
         };
+        this.props.salesforceClient.refreshToken_()
+          .then(response => {
+              console.log('*** refreshToken then: ', response)
+              const { access_token } = response;
+              this.setState({
+                  isDisplayGrid: true,
+                  access_token
+              });
+          });
     }
 
     componentDidMount() {
@@ -175,8 +171,8 @@ class Root extends React.Component {
         });
     }
 
-    selectRecord_ = selectedRecordId => {
-        this.props.entity.setSelectedRecord(selectedRecordId);
+    selectRecord_ = name => {
+        this.props.entity.setGrid({name});
         this.hideRecordPicker_();
     };
 
@@ -285,9 +281,24 @@ class Root extends React.Component {
     }
 
     render() {
-        const {showMismatchedInstanceError, showRecordPicker} = this.state;
+        let {
+          showMismatchedInstanceError, 
+          showRecordPicker,
+          isDisplayGrid,
+          access_token
+        } = this.state;
+console.log('*** isDisplayGrid: ', isDisplayGrid)
+console.log('*** access_token: ', access_token)
+        const {
+          entity, 
+          menuDelegate
+        } = this.props;
 
-        const {entity, menuDelegate} = this.props;
+        window.resetGrid = function (){
+            entity.setGrid(null);
+        }
+        const grid = entity.getGrid();
+        console.log('*** grid: ', grid)
 
         let dialog;
         if (showMismatchedInstanceError) {
@@ -299,34 +310,24 @@ class Root extends React.Component {
                 onDismiss={this.hideRecordPicker_}/>;
         }
 
-        const selectedRecord = entity.getSelectedRecord();
-        // Should hit this only in url unfurling case
-        if (!selectedRecord) {
+        if (!isDisplayGrid) {
             return <quip.apps.ui.Image.Placeholder size={25} loading={true}/>;
         }
-        const recordComponent = <Record
-            entity={selectedRecord}
-            menuDelegate={menuDelegate}
-            ref={node => (this.recordComponent_ = node)}/>;
 
         const recordContainerClassNames = [];
         let chooseRecordButton;
         let contextInstructions;
         let placeholderOverlay;
         let recordContainerOnclick;
-        if (selectedRecord && selectedRecord.isPlaceholder()) {
-            const loggedIn = entity.getClient().isLoggedIn();
-            if (!loggedIn) {
-                contextInstructions = this.loginHelpDiv();
-            }
-            const actionText = loggedIn
-                ? quiptext("Select Record…")
-                : quiptext("Connect to Salesforce…");
+        if (grid == undefined || grid.name == undefined) {
+            isDisplayGrid = false;
+            contextInstructions = this.loginHelpDiv();
+
             recordContainerClassNames.push(Styles.placeholder);
             chooseRecordButton = <div className={Styles.openPicker}>
                 <quip.apps.ui.Button
                     disabled={showRecordPicker}
-                    text={actionText}/>
+                    text={quiptext("Select Grid…")}/>
             </div>;
             placeholderOverlay = <div className={Styles.placeholderOverlay}/>;
             recordContainerOnclick = this.showRecordPicker_;
@@ -338,9 +339,11 @@ class Root extends React.Component {
                 {chooseRecordButton}
                 {contextInstructions}
                 {placeholderOverlay}
-                {recordComponent}
+                
             </div>
             {dialog}
+            {isDisplayGrid &&
+                <iframe src={`https://gridbuddydemo--gblite.na35.visual.force.com/secur/frontdoor.jsp?sid=${access_token}&retURL=/apex/gblite__Grid?gname=${encodeURIComponent(grid.name)}&sh=0&ssb=0`} style={{border: '1px solid #0000001f'}} width="100%" height="750" scrolling="auto"></iframe>}
         </div>;
     }
 }

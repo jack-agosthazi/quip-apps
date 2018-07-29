@@ -237,43 +237,17 @@ export class RecordPickerEntity extends quip.apps.RootRecord {
     }
 
     fetchRecordsDataByQuery_(query, recordType, searchTerm = null) {
-        if (searchTerm) {
-            query = this.reformatQuery_(query, recordType, searchTerm);
-        }
-        // FIXME
-        console.log('*** QUERY ADDED HERE')
-        query = `SELECT GBLite__Grid_Name__c, Id, CreatedBy.Name, LastModifiedBy.Name FROM GBLite__GridBuddySettings__c WHERE GBLite__Default_Definition__c = true ORDER BY GBLite__Grid_Name__c ASC`;
-        query = query + " LIMIT 200";
+        const searchField = 'GBLite__Grid_Name__c';
+        query = `SELECT GBLite__Grid_Name__c, Id, CreatedBy.Name, LastModifiedBy.Name 
+            FROM GBLite__GridBuddySettings__c 
+            WHERE GBLite__Default_Definition__c = true 
+            AND ${searchField} LIKE \'%${searchTerm}%\' 
+            ORDER BY GBLite__Grid_Name__c ASC 
+            LIMIT 200`;
         console.log('*** query: ', query)
         return this.getClient()
             .fetchSoqlQuery(query)
             .then(response => parseSoqlRecords(response, getSearchField));
-    }
-
-    //TODO: move to util.js
-    reformatQuery_(query, recordType, searchTerm) {
-        if (!query) return;
-        query = query.toLowerCase();
-
-        const searchField = getSearchField(recordType);
-        if (query.includes("order by")) {
-            const seg = query.split("order by");
-            if (seg[0].includes("where")) {
-                seg[0] += ` AND ${searchField} LIKE \'%${searchTerm}%\' `;
-            } else {
-                seg[0] += ` Where ${searchField} LIKE \'%${searchTerm}%\' `;
-            }
-            return seg[0] + "order by" + seg[1];
-        }
-
-        if (query.includes("where")) {
-            query += ` AND ${searchField} LIKE \'%${searchTerm}%\' `;
-        } else {
-            query += ` Where ${searchField} LIKE \'%${searchTerm}%\' `;
-        }
-        console.log('*** query: ', query)
-          //`SELECT GBLite__Grid_Name__c, Id, CreatedBy.Name, LastModifiedBy.Name FROM GBLite__GridBuddySettings__c WHERE GBLite__Default_Definition__c = true ORDER BY GBLite__Grid_Name__c ASC`
-        return query;
     }
 
     fetchRecordDataForListView(recordType, listViewKey, searchTerm = null) {
@@ -321,7 +295,6 @@ export class RecordPickerEntity extends quip.apps.RootRecord {
                     listViewKey
                 ].query = query;
                 return query;
-console.log('*** query: ', query)
             });
     }
 
@@ -399,14 +372,6 @@ console.log('*** query: ', query)
     getSelectedRecord() {
         return this.get("selectedRecord");
     }
-
-    setGridName(gridName){
-        this.set("gridName", gridName);
-    }
-    
-    getGridName(){
-        return this.get("gridName");
-    }
     
     setSelectedRecord(recordId) {
         this.clearSelectedRecord();
@@ -418,6 +383,7 @@ console.log('*** query: ', query)
             recordTypes[recordType].ownerId = ownerId;
         }
         this.setRecordTypes(recordTypes);
+        this.clearSelectedRecord();
         this.set("selectedRecord", {
             recordId: recordId,
             ownerId: ownerId,

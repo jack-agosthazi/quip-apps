@@ -212,9 +212,9 @@ export class SalesforceClient {
             }).then(response => {
                 if (response.status == 401 && tryRefreshToken) {
                     // refetch the endpoint after refresh
-                    return this.refreshToken_().then(response =>
-                        this.request_(fetchMethod, baseUrl, data, false)
-                    );
+                    return this.refreshToken_().then(response => {
+                          return this.request_(fetchMethod, baseUrl, data, false)
+                    });
                 }
                 if (response.status >= 400) {
                     const error = this.getErrorFromStatus_(response.status);

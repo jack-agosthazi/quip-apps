@@ -176,19 +176,20 @@ export default class RecordPicker extends React.Component {
     };
 
     selectRecordId_ = (e, newlySelectedRecord) => {
+console.log('*** newlySelectedRecord: ', newlySelectedRecord)
         if (newlySelectedRecord &&
-            newlySelectedRecord.id != this.state.selectedObjectId) {
+            newlySelectedRecord.name != this.state.selectedObjectId) {
             this.setState({
-                selectedObjectId: newlySelectedRecord.id,
+                selectedObjectId: newlySelectedRecord.name,
             });
         }
     };
 
-    selectRecord_ = e => {
+    selectGrid_ = e => {
         if (this.state.selectedObjectId === null) {
             return;
         }
-
+console.log('*** this.state.selectedObjectId: ', this.state.selectedObjectId)
         this.props.onSelectRecord(this.state.selectedObjectId);
     };
 
@@ -244,7 +245,7 @@ export default class RecordPicker extends React.Component {
                             searchPlaceholder={recordFilterPlaceholder}
                             selectedObjectId={selectedObjectId}
                             onClick={this.selectRecordId_}
-                            onSubmit={this.selectRecord_}
+                            onSubmit={this.selectGrid_}
                             onUpdateQuery={this.setQuery_}/>}
                     </div>
                 </div>
@@ -255,8 +256,8 @@ export default class RecordPicker extends React.Component {
                     <quip.apps.ui.Button
                         primary={true}
                         disabled={selectedObjectId === null}
-                        text={quiptext("Select Record")}
-                        onClick={this.selectRecord_}/>
+                        text={quiptext("Select Grid")}
+                        onClick={this.selectGrid_}/>
                 </div>
             </div>
         </Dialog>;
@@ -377,7 +378,7 @@ class RecordFilter extends React.Component {
 
     renderRow_ = (recordData, isHighlighted, index) => {
         const classNames = [Styles.recordRow];
-        if (this.props.selectedObjectId === recordData.id) {
+        if (this.props.selectedObjectId === recordData.name) {
             classNames.push(Styles.highlighted);
         }
 

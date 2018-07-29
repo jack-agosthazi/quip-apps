@@ -25,9 +25,10 @@
             "https://gridbuddydemo--gblite.na35.visual.force.com"
         ],
         "frame_srcs": [
-            "https://gridbuddydemo.force.com",
-            "https://gridbuddydemo.my.salesforce.com/",
-            "https://gridbuddydemo--gblite.na35.visual.force.com"
+            "https://*.salesforce.com",
+            "https://*.content.force.com",
+            "https://*.force.com",
+            "https://*.visual.force.com"
         ],
         "img_srcs": [
             "https://gridbuddydemo.force.com",

@@ -107,6 +107,7 @@ export class FieldBuilderMenu extends BaseMenu {
             disabledCommands.push("save-data");
             disabledCommands.push("open-in-salesforce");
         } else {
+console.log('*** selectedRecord: ', selectedRecord)
             if (selectedRecord.isPlaceholder() ||
                 (quip.apps.getViewingUser() !== null &&
                     selectedRecord.getOwnerId() ===
@@ -131,6 +132,7 @@ export class FieldBuilderMenu extends BaseMenu {
     }
 
     refreshToolbar() {
+        console.log('*** refreshToolbar: ', this.getDisabledCommands_())
         quip.apps.updateToolbarCommandsState(this.getDisabledCommands_(), []);
     }
 
@@ -139,8 +141,8 @@ export class FieldBuilderMenu extends BaseMenu {
         const toolbarCommandIds = this.getToolbarCommandIds(recordEntity);
         const instanceCommands = this.getInstanceCommands_();
         const hasInstanceCommands = Object.keys(instanceCommands).length > 0;
-
-        if (recordEntity.isPlaceholder()) {
+console.log('*** recordEntity: ', recordEntity)
+        if (recordEntity && recordEntity.isPlaceholder()) {
             this.updateMenuForPlaceholderRecord_(
                 menuCommands,
                 toolbarCommandIds,
@@ -193,6 +195,8 @@ export class FieldBuilderMenu extends BaseMenu {
         updatedMenuCommands.push(...Object.values(instanceCommands));
 
         const allMenuCommands = [...updatedMenuCommands, ...menuCommands];
+        console.log('*** updateToolbar toolbarCommandIds: ', toolbarCommandIds)
+        console.log('*** updateToolbar allMenuCommands: ', allMenuCommands)
         quip.apps.updateToolbar({
             toolbarCommandIds,
             menuCommands: allMenuCommands,
@@ -272,6 +276,8 @@ export class FieldBuilderMenu extends BaseMenu {
 
     getToolbarCommandIds(recordEntity) {
         const commandIds = this.getDefaultToolbarCommandIds();
+console.log('*** getToolbarCommandIds recordEntity: ', recordEntity)
+
         if (!recordEntity.isPlaceholder() &&
             !this.isCommandDisabled_("add-field")) {
             commandIds.push("add-field");
