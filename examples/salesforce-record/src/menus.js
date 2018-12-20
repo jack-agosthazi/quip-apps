@@ -40,7 +40,7 @@ export class FieldBuilderMenu extends BaseMenu {
             },
             {
                 id: "save-data",
-                label: quiptext("Save to Salesforce"),
+                label: quiptext("Select New Grid"),
                 quipIcon: quip.apps.MenuIcons.SYNCING,
                 handler: wrapHandlerWithLogin("save-data", () =>
                     this.saveData_()
@@ -136,60 +136,27 @@ console.log('*** selectedRecord: ', selectedRecord)
         quip.apps.updateToolbarCommandsState(this.getDisabledCommands_(), []);
     }
 
-    updateToolbar(recordEntity) {
+    updateToolbar() {
         const menuCommands = this.allMenuCommands();
-        const toolbarCommandIds = this.getToolbarCommandIds(recordEntity);
+        const toolbarCommandIds = this.getToolbarCommandIds();
         const instanceCommands = this.getInstanceCommands_();
         const hasInstanceCommands = Object.keys(instanceCommands).length > 0;
-console.log('*** recordEntity: ', recordEntity)
-        if (recordEntity && recordEntity.isPlaceholder()) {
-            this.updateMenuForPlaceholderRecord_(
-                menuCommands,
-                toolbarCommandIds,
-                instanceCommands);
-            return;
-        }
+console.log('*** instanceCommands: ', instanceCommands)
         const mainMenuSubCommands = [
-            "record-header",
             "change-record",
             "open-in-salesforce",
             quip.apps.DocumentMenuCommands.SEPARATOR,
             quip.apps.DocumentMenuCommands.SEPARATOR,
-            "last-updated-time",
-            "refresh-record",
         ];
         if (hasInstanceCommands) {
             mainMenuSubCommands.push(
                 quip.apps.DocumentMenuCommands.SEPARATOR,
                 ...Object.keys(instanceCommands));
         }
-
-        let lastUpdatedLabel = BaseMenu.getLastUpdatedString(recordEntity);
-        const recordOwner = recordEntity.getOwner();
-        if (recordOwner !== null) {
-            lastUpdatedLabel +=
-                " • " +
-                quiptext("Connected as %(name)s", {
-                    "name": recordOwner.getName(),
-                });
-        }
         const updatedMenuCommands = [
             {
                 id: quip.apps.DocumentMenuCommands.MENU_MAIN,
                 subCommands: mainMenuSubCommands,
-            },
-            {
-                id: "record-header",
-                label:
-                    recordEntity.getHeaderName() +
-                    "\n" +
-                    quip.apps.getRootEntity().getHostname(),
-                isHeader: true,
-            },
-            {
-                id: "last-updated-time",
-                label: lastUpdatedLabel,
-                isHeader: true,
             },
         ];
         updatedMenuCommands.push(...Object.values(instanceCommands));
@@ -274,15 +241,8 @@ console.log('*** recordEntity: ', recordEntity)
             });
     }
 
-    getToolbarCommandIds(recordEntity) {
-        const commandIds = this.getDefaultToolbarCommandIds();
-console.log('*** getToolbarCommandIds recordEntity: ', recordEntity)
-
-        if (!recordEntity.isPlaceholder() &&
-            !this.isCommandDisabled_("add-field")) {
-            commandIds.push("add-field");
-        }
-        return commandIds;
+    getToolbarCommandIds() {
+        return this.getDefaultToolbarCommandIds();
     }
 
     getDefaultToolbarCommandIds() {

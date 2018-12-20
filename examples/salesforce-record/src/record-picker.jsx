@@ -189,7 +189,6 @@ console.log('*** newlySelectedRecord: ', newlySelectedRecord)
         if (this.state.selectedObjectId === null) {
             return;
         }
-console.log('*** this.state.selectedObjectId: ', this.state.selectedObjectId)
         this.props.onSelectRecord(this.state.selectedObjectId);
     };
 

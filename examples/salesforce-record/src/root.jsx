@@ -44,8 +44,6 @@ quip.apps.registerClass(SalesforceRecordEntity, SalesforceRecordEntity.ID);
 quip.apps.registerClass(TextFieldEntity, TextFieldEntity.ID);
 
 
-console.log('grid-record: ', quip.apps.getRecordById('recordPicker'))
-
 let rootComponent;
 export function getRecordComponent() {
     return getRootComponent().getRecordComponent();
@@ -68,30 +66,6 @@ quip.apps.initialize({
                 : AUTH_CONFIG_NAMES.PRODUCTION);
         const salesforceClient = new SalesforceClient(auth);
         rootRecord.setClient(salesforceClient);
-
-
-
-
-        //if (params.isCreation && params.creationUrl) {
-        //    const recordId = params.creationUrl
-        //      .split("sObject/")[1]
-        //      .split("/view")[0];
-        //    if (recordId.length == 18) {
-        //        rootRecord.fetchData().then(() => {
-        //            rootRecord.setSelectedRecord(recordId);
-        //        });
-        //    }
-        //} else if (params.isCreation) {
-        //    rootRecord.loadPlaceholderData(PlaceholderData);
-        //} else if (quip.apps.CreationSource &&
-        //  params.creationSource === quip.apps.CreationSource.TEMPLATE) {
-        //    rootRecord.clearData();
-        //    rootRecord.loadPlaceholderData(PlaceholderData);
-        //}
-
-        //rootRecord.loadPlaceholderData(PlaceholderData);
-
-
 
         ReactDOM.render(
           <div>
@@ -116,28 +90,40 @@ class Root extends React.Component {
     };
 
     constructor(props) {
-        super(props);
-        this.state = {
-            showRecordPicker: true,
-            showMismatchedInstanceError: false,
-            prevMenuCommand: null,
-        };
-        this.props.salesforceClient.refreshToken_()
-          .then(response => {
-              console.log('*** refreshToken then: ', response)
-              const { access_token } = response;
-              this.setState({
-                  isDisplayGrid: true,
-                  access_token
-              });
+      super(props);
+      this.state = {
+        showRecordPicker: false,
+        showMismatchedInstanceError: false,
+        prevMenuCommand: null,
+        isDisplayGrid: false,
+        access_token: null,
+        instance_url: null,
+      };
+
+      const loggedIn = props.entity.getClient().isLoggedIn();
+      if(loggedIn){
+        this.refreshToken();
+      }
+    }
+  
+    refreshToken() {
+      this.props.salesforceClient.refreshToken_()
+        .then(response => {
+          const { access_token, instance_url } = response;
+          this.setState({
+            isDisplayGrid: true,
+            access_token,
+            instance_url,
           });
+        });
     }
 
     componentDidMount() {
-        this.props.menuDelegate.refreshToolbar();
-        quip.apps.addEventListener(
-            quip.apps.EventType.ELEMENT_BLUR,
-            this.hideRecordPicker_);
+      this.props.menuDelegate.updateToolbar();
+      this.props.menuDelegate.refreshToolbar();
+      quip.apps.addEventListener(
+          quip.apps.EventType.ELEMENT_BLUR,
+          this.hideRecordPicker_);
     }
 
     componentDidUpdate(prevProps, prevState) {
@@ -174,6 +160,7 @@ class Root extends React.Component {
     selectRecord_ = name => {
         this.props.entity.setGrid({name});
         this.hideRecordPicker_();
+        this.refreshToken();
     };
 
     hideRecordPicker_ = () => {
@@ -285,7 +272,8 @@ class Root extends React.Component {
           showMismatchedInstanceError, 
           showRecordPicker,
           isDisplayGrid,
-          access_token
+          access_token,
+          instance_url,
         } = this.state;
 console.log('*** isDisplayGrid: ', isDisplayGrid)
 console.log('*** access_token: ', access_token)
@@ -294,9 +282,7 @@ console.log('*** access_token: ', access_token)
           menuDelegate
         } = this.props;
 
-        window.resetGrid = function (){
-            entity.setGrid(null);
-        }
+
         const grid = entity.getGrid();
         console.log('*** grid: ', grid)
 
@@ -310,29 +296,36 @@ console.log('*** access_token: ', access_token)
                 onDismiss={this.hideRecordPicker_}/>;
         }
 
-        if (!isDisplayGrid) {
-            return <quip.apps.ui.Image.Placeholder size={25} loading={true}/>;
-        }
+        //if (!isDisplayGrid) {
+        //    return <quip.apps.ui.Image.Placeholder size={25} loading={true}/>;
+        //}
 
         const recordContainerClassNames = [];
         let chooseRecordButton;
         let contextInstructions;
         let placeholderOverlay;
         let recordContainerOnclick;
-        if (grid == undefined || grid.name == undefined) {
-            isDisplayGrid = false;
+        const loggedIn = entity.getClient().isLoggedIn();
+        if (!loggedIn || grid == undefined || grid.name == undefined) {
+          if (!loggedIn) {
             contextInstructions = this.loginHelpDiv();
-
-            recordContainerClassNames.push(Styles.placeholder);
-            chooseRecordButton = <div className={Styles.openPicker}>
-                <quip.apps.ui.Button
-                    disabled={showRecordPicker}
-                    text={quiptext("Select Grid…")}/>
-            </div>;
-            placeholderOverlay = <div className={Styles.placeholderOverlay}/>;
-            recordContainerOnclick = this.showRecordPicker_;
+          }
+          const actionText = loggedIn
+            ? quiptext("Select Grid…")
+            : quiptext("Connect to Salesforce…");
+          isDisplayGrid = false;
+  
+          recordContainerClassNames.push(Styles.placeholder);
+          chooseRecordButton = (
+            <div className={Styles.openPicker}>
+              <quip.apps.ui.Button disabled={showRecordPicker} text={actionText} />
+            </div>
+          );
+          placeholderOverlay = <div className={Styles.placeholderOverlay} />;
+          recordContainerOnclick = this.showRecordPicker_;
         }
-        return <div className={Styles.root}>
+
+      return <div className={Styles.root}>
             <div
                 className={recordContainerClassNames.join(" ")}
                 onClick={recordContainerOnclick}>
@@ -342,8 +335,8 @@ console.log('*** access_token: ', access_token)
                 
             </div>
             {dialog}
-            {isDisplayGrid &&
-                <iframe src={`https://gridbuddydemo--gblite.na35.visual.force.com/secur/frontdoor.jsp?sid=${access_token}&retURL=/apex/gblite__Grid?gname=${encodeURIComponent(grid.name)}&sh=0&ssb=0`} style={{border: '1px solid #0000001f'}} width="100%" height="750" scrolling="auto"></iframe>}
+            {isDisplayGrid && access_token && 
+                <iframe src={`${instance_url}/secur/frontdoor.jsp?sid=${access_token}&retURL=/apex/gblite__Grid?gname=${encodeURIComponent(grid.name)}&sh=0&ssb=0`} style={{border: '1px solid #0000001f', padding: '8px'}} width="100%" height="750" scrolling="auto"></iframe>}
         </div>;
     }
 }
