@@ -13,8 +13,10 @@
     "css_files": ["dist/app.css"],
     "csp_sources": {
         "script_srcs": [
-            "https://*.force.com",
-            "https://*.salesforce.com"
+            "*.force.com",
+            "'unsafe-eval'",
+            "'unsafe-inline'",
+            "*.salesforce.com"
         ],
         "font_srcs": [
             "https://*.salesforce.com",
